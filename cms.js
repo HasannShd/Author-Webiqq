@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '15';
+  var SEED_VERSION = '16';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);

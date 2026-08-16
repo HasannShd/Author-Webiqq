@@ -701,7 +701,12 @@ footer ul a:hover { color: var(--paper); }
   background: radial-gradient(70% 60% at 50% 0%, rgba(195,174,155,.14), transparent 70%);
 }
 .verse-hero .wrap { position: relative; }
-.verse-mark { font-size: 26px; color: var(--gold-soft); opacity: .5; letter-spacing: .3em; }
+/* An Arabic typographic ornament, so it keeps the Arabic face in both
+   languages — the Latin stack has no glyph for it and falls back badly. */
+.verse-mark {
+  font-family: var(--arabic); font-size: 26px; color: var(--gold-soft);
+  opacity: .5; letter-spacing: .3em;
+}
 .verse {
   font-family: var(--arabic); font-size: clamp(19px, 2.9vw, 31px); line-height: 2.1;
   max-width: 30ch; margin: 14px auto 0; color: var(--gold-soft);
