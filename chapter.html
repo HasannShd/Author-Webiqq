@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الفصل — الفلك والقراء</title>
+<meta name="description" content="Read a chapter and comment on any passage.">
+<meta name="theme-color" content="#2c3532">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.className += " js";</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="index.html">
+      <span class="brand-mark ar">ف</span>
+      <span class="brand-txt"><b>الفلك والقراء</b><span>د. محمد قيصرون ميرزا</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="admin-link" href="admin.html" title="Editor login">لوحة التحرير</a>
+      <button class="lang" type="button" aria-label="Switch to English">EN</button>
+      <button class="burger" aria-expanded="false" aria-label="Open menu" aria-controls="mobile-menu"><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <div class="wrap">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html">Editor login</a>
+      <button class="lang" type="button" aria-label="Switch to English">EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="progress" role="presentation"></div>
+<button class="hl-pop" id="hl-pop" type="button" hidden>علّق على المحدَّد</button>
+
+<main id="main">
+  <div class="wrap read-head" id="chapter"></div>
+
+  <section class="section" id="comments">
+    <div class="wrap comments-wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Comments and questions</p>
+          <h2>Discussion</h2>
+        </div>
+        <span class="cmt-count" id="comment-count"></span>
+      </div>
+
+      <div id="comment-list"></div>
+
+      <form id="comment-form" class="comment-form" novalidate>
+        <h3>Add a comment or a question</h3>
+        <div class="quote-box" id="quote-box" hidden>
+          <span>On this passage</span>
+          <q dir="auto"></q>
+          <button type="button" id="quote-clear">Remove</button>
+        </div>
+        <input type="hidden" id="cm-quote">
+        <div class="grid-2">
+          <div class="field">
+            <label for="cm-name">Your name</label>
+            <input id="cm-name" type="text" placeholder="Full name" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="cm-email">Email (not published)</label>
+            <input id="cm-email" type="email" placeholder="your@email.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="field">
+          <label for="cm-text">Your comment or question</label>
+          <textarea id="cm-text" placeholder="Disagreement is welcome. Rudeness is not." required></textarea>
+        </div>
+        <button class="btn btn-gold" type="submit">Post</button>
+        <p class="form-note" style="color:var(--muted)">The author reads and replies to every one.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="index.html">
+          <span class="brand-mark ar">ف</span>
+          <span class="brand-txt"><b>الفلك والقراء</b><span>د. محمد قيصرون ميرزا</span></span>
+        </a>
+        <p class="foot-about">The astronomy book in full, free to read and free to download, with a place for readers to ask about any passage.</p>
+      </div>
+      <div>
+        <h4>Read</h4>
+        <ul>
+          <li><a href="index.html">The books</a></li>
+          <li><a href="chapter.html?book=falak&ch=1">Astronomy</a></li>
+          <li><a href="chapter.html?book=fizya&ch=1">Physics</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>The author</h4>
+        <ul>
+          <li><a href="about.html">About the author</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="admin.html">Editor login</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="foot-contact">
+          <li><span>Write to the author</span><a href="mailto:author@example.com">author@example.com</a></li>
+          <li><span>Rights and translation</span><a href="mailto:rights@example.com">rights@example.com</a></li>
+          <li><span>Based in</span><b>Bahrain</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© 2026 د. محمد قيصرون ميرزا .</p>
+      <p>Bahrain <span class="build-stamp">v14 · 2026-08-16</span></p>
+    </div>
+  </div>
+</footer>
+<script src="i18n.js" defer></script>
+<script src="content.js" defer></script>
+<script src="cms.js" defer></script>
+<script src="script.js" defer></script>
+</body>
+</html>
