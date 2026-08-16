@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '14';
+  var SEED_VERSION = '15';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -276,6 +276,7 @@
       arabicNote() +
 
       '<div class="ch-intro">' +
+        figures(c.images, f(c, 'title')) +
         (c.intro && c.intro.length ? '<h2>' + T('مقدّمة الفصل', 'The chapter opens') + '</h2>' + readable(c.intro) : '') +
         '<div class="ch-tools">' +
           '<p class="hl-hint">' + T('حدّد أيّ نصّ لتعلّق عليه أو تطرح سؤالًا حوله.',
