@@ -29,22 +29,21 @@
     "Based in": "المقرّ",
     "Dr. Mohammed Qaisaroun Mirza": "د. محمد قيصرون ميرزا",
     "الفلك والقراء": "الفلك والقراء",
-    "The astronomy book in full, free to read and free to download, with a place for readers to ask about any passage.":
-      "كتابُ الفلك كاملًا، مجانًا للقراءة والتحميل، وفيه مكانٌ للقارئ ليسأل عن أيّ فقرة.",
+    "The astronomy book in full, free to read on the page, with a place for readers to ask about any passage.":
+      "كتابُ الفلك كاملًا، مجانًا للقراءة على الصفحة، وفيه مكانٌ للقارئ ليسأل عن أيّ فقرة.",
     "Bahrain": "البحرين",
     
     "In preparation": "قيدُ الإعداد",
-    "Download the whole book (PDF)": "تحميل الكتاب كاملًا (PDF)",
-    "Cover, dedication and introduction": "الغلاف والإهداء والمقدّمة",
-    "Chapter cover and introduction (PDF)": "غلاف الفصل ومقدّمته (PDF)",
-    "Open this section (PDF)": "فتح هذا القسم (PDF)",
     "The chapter opens": "مقدّمة الفصل",
     "This book is in preparation.": "هذا الكتاب قيدُ الإعداد.",
-    "The text of this section is in the attached PDF.": "نصّ هذا القسم في ملفّ الـPDF المرفق.",
+
+    "Start reading": "ابدأ القراءة",
+    "In this chapter": "محتويات الفصل",
+    "Contents": "المحتويات",
 
     /* ---- home ---- */
-    "The astronomy book in full — eight chapters, from what the universe is made of to a dialogue between mind and heart — written for the curious reader rather than the specialist. Free to read, free to download, and open to your questions on any passage.":
-      "كتابُ الفلك كاملًا — ثمانيةُ فصولٍ، من مكوّنات الكونِ إلى حوارٍ بين العقلِ والقلبِ — كُتب للقارئ الفضوليّ لا للمتخصّص. مجانًا للقراءة، ومجانًا للتحميل، ومفتوحٌ لأسئلتك على أيّ فقرة.",
+    "The astronomy book in full — eight chapters, from what the universe is made of to a dialogue between mind and heart — written for the curious reader rather than the specialist. Every page is here to read, and open to your questions on any passage.":
+      "كتابُ الفلك كاملًا — ثمانيةُ فصولٍ، من مكوّنات الكونِ إلى حوارٍ بين العقلِ والقلبِ — كُتب للقارئ الفضوليّ لا للمتخصّص. صفحاتُه كلُّها هنا للقراءة، ومفتوحٌ لأسئلتك على أيّ فقرة.",
     "Both books": "الكتابان",
     "How to read here": "كيف تقرأ هنا",
     "Ask about any sentence.": "اسأل عن أيّ جملة.",
@@ -99,8 +98,8 @@
       "تحوّلت مذكّرات المحاضرات إلى مخطوطة، أُعيدت كتابتها ثلاث مرّات لحذف كلّ ما يفترض دراسةً سابقة.",
     "The astronomy book published, free":
       "صدور كتاب الفلك مجانًا",
-    "Eight chapters, free to read and free to download, with a comment thread on every one of them. The physics book is in preparation.":
-      "ثمانيةُ فصولٍ، مجانًا للقراءة والتحميل، ومع مساحة نقاشٍ في كلٍّ منها. وكتابُ الفيزياء قيدُ الإعداد.",
+    "Eight chapters, every page readable here, with a comment thread on every one of them. The physics book is in preparation.":
+      "ثمانيةُ فصولٍ، صفحاتُها كلُّها هنا للقراءة، ومع مساحة نقاشٍ في كلٍّ منها. وكتابُ الفيزياء قيدُ الإعداد.",
     "Read the books": "اقرأ الكتاب",
     "Get in touch": "تواصل معنا",
 
@@ -128,8 +127,8 @@
     "Before you write": "قبل أن تكتب",
     "Questions we answer most": "أكثر الأسئلة تكرارًا",
     "Are the books really free?": "هل الكتابان مجانيّان فعلًا؟",
-    "Yes. Both books are readable in full on this site and downloadable as PDF, with no account and no payment.":
-      "نعم. الكتابان يُقرآن كاملَين على هذا الموقع ويُحمَّلان بصيغة PDF، بلا حساب وبلا دفع.",
+    "Yes. The astronomy book is readable in full on this site, with no account and no payment.":
+      "نعم. كتابُ الفلك متاحٌ كاملًا للقراءة على هذا الموقع، بلا حسابٍ وبلا مقابل.",
     "Can I quote or translate a chapter?": "هل يمكنني اقتباس فصل أو ترجمته؟",
     "For non-commercial use, yes, with attribution and a link. Commercial reprints and translations are handled case by case.":
       "للاستخدام غير التجاريّ نعم، مع نسبة النصّ ورابطٍ إليه. أمّا إعادة النشر والترجمة التجاريّة فتُدرس حالةً بحالة.",

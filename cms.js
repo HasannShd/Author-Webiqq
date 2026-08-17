@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '17';
+  var SEED_VERSION = '19';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -35,7 +35,6 @@
       author: 'د. محمد قيصرون ميرزا', author_en: 'Dr. Mohammed Qaisaroun Mirza',
       year: '2026',
       cover: 'img/cover.jpg',
-      pdf: 'pdf/full-book.pdf',
       front: BOOK.front,
       blurb: 'ثمانيةُ فصولٍ تبدأ بتعريفِ الكونِ ومكوّناتِه، وتمرُّ بتاريخِ الفلكِ عند القدماءِ والمسلمين، ' +
              'وبالأبراجِ وأساطيرِها، وبالضوءِ والتحليلِ الطيفيِّ، وبعصرِ التلسكوباتِ ورحلاتِ الفضاءِ، ' +
@@ -55,7 +54,6 @@
       author: 'د. محمد قيصرون ميرزا', author_en: 'Dr. Mohammed Qaisaroun Mirza',
       year: '2026',
       cover: 'img/science.svg',
-      pdf: '',
       pending: true,
       blurb: 'كتابُ الفيزياء قيدُ الإعداد، وسيُنشرُ هنا مجّانًا مثلَ كتابِ الفلك.',
       blurb_en: 'The physics book is in preparation, and will be published here free, like the astronomy book.',
@@ -128,10 +126,14 @@
       paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</div>';
   }
 
+  /* width and height are carried so the browser reserves the space before the
+     image loads — without them the page grows as figures arrive and a jump to
+     a section lands short. */
   function figures(list, alt) {
     if (!list || !list.length) return '';
-    return '<div class="figs">' + list.map(function (src) {
-      return '<img src="' + esc(src) + '" alt="' + esc(alt) + '" loading="lazy" decoding="async">';
+    return '<div class="figs">' + list.map(function (im) {
+      return '<img src="' + esc(im.src) + '" alt="' + esc(alt) + '"' +
+        ' width="' + im.w + '" height="' + im.h + '" loading="lazy" decoding="async">';
     }).join('') + '</div>';
   }
 
@@ -191,14 +193,11 @@
             (b.pending
               ? '<p class="vol-free">' + T('قيدُ الإعداد', 'In preparation') + '</p>'
               : '<p class="vol-free">' + num(tops) + T(' فصلًا · ', ' chapters · ') + num(parts) +
-                T(' قسمًا · مجّانًا للتحميل', ' sections · free to download') + '</p>') +
-            (b.pdf
+                T(' قسمًا · مجّانًا للقراءة', ' sections · free to read') + '</p>') +
+            (tops
               ? '<div class="vol-actions">' +
-                  '<a class="btn btn-gold" href="' + esc(b.pdf) + '" download>' +
-                    T('تحميل الكتاب كاملًا (PDF)', 'Download the whole book (PDF)') + '</a>' +
-                  (b.front && b.front.pdf
-                    ? '<a class="btn btn-outline" href="' + esc(b.front.pdf) + '" target="_blank" rel="noopener">' +
-                      T('الغلاف والإهداء والمقدّمة', 'Cover, dedication and introduction') + '</a>' : '') +
+                  '<a class="btn btn-gold" href="chapter.html?book=' + esc(b.id) + '&ch=' +
+                    b.chapters[0].n + '">' + T('ابدأ القراءة', 'Start reading') + '</a>' +
                 '</div>' : '') +
           '</div>' +
         '</div>' +
@@ -229,38 +228,34 @@
   /* ---------------- chapter reader ---------------- */
   var current = null;
 
-  function sectionBody(s) {
-    return '<div class="sec-body">' +
-      (s.body && s.body.length
-        ? readable(s.body)
-        : '<p class="sec-pending">' + T('نصّ هذا القسم في ملفّ الـPDF المرفق.',
-                                        'The text of this section is in the attached PDF.') + '</p>') +
-      figures(s.images, f(s, 'title')) +
-      footnotes(s.notes) +
-      (s.pdf ? '<a class="btn btn-outline" href="' + esc(s.pdf) + '" target="_blank" rel="noopener">' +
-         T('فتح هذا القسم (PDF)', 'Open this section (PDF)') + '</a>' : '') +
-      '</div>';
-  }
-
-  function sectionCard(s, open) {
-    return '<details class="sec" id="' + anchor(s.label) + '"' + (open ? ' open' : '') + '>' +
-      '<summary>' +
+  /* A section of the chapter: its heading, its text, its figures and its
+     footnotes, all on the page. Sub-sections sit a level down. */
+  function sectionBlock(s) {
+    var h = s.depth ? 'h3' : 'h2';
+    return '<section class="sec-block' + (s.depth ? ' sub' : '') + '" id="' + anchor(s.label) + '">' +
+      '<' + h + ' class="sec-h">' +
         (s.label ? '<span class="sec-n">' + esc(s.label) + '</span>' : '') +
         '<span class="sec-t">' + esc(s.title) + '</span>' +
         (isAr() || !s.title_en ? '' : '<span class="sec-term">' + esc(s.title_en) + '</span>') +
-        '<span class="sec-open" aria-hidden="true"></span>' +
-      '</summary>' + sectionBody(s) + '</details>';
+      '</' + h + '>' +
+      readable(s.body) +
+      figures(s.images, f(s, 'title')) +
+      footnotes(s.notes) +
+      '</section>';
   }
 
-  /* The author nests his sections one level deep; a sub-section renders inside
-     the top-level section it belongs to. */
-  function nest(sections) {
-    var out = [];
-    sections.forEach(function (s) {
-      if (s.depth && out.length) out[out.length - 1].subs.push(s);
-      else out.push({ top: s, subs: [] });
-    });
-    return out;
+  function chapterToc(c) {
+    return '<aside class="ch-toc"><div class="toc">' +
+      '<h4>' + T('محتويات الفصل', 'In this chapter') + '</h4>' +
+      '<ol>' +
+        (c.intro && c.intro.length
+          ? '<li><a href="#ch-open">' + T('مقدّمة الفصل', 'The chapter opens') + '</a></li>' : '') +
+        c.sections.map(function (x) {
+          return '<li' + (x.depth ? ' class="sub"' : '') + '>' +
+            '<a href="#' + anchor(x.label) + '">' +
+              (x.label ? '<b>' + esc(x.label) + '</b> ' : '') + esc(x.title) + '</a></li>';
+        }).join('') +
+      '</ol></div></aside>';
   }
 
   function renderChapter() {
@@ -280,70 +275,94 @@
     var next = b.chapters.filter(function (x) { return x.n === c.n + 1; })[0];
 
     host.innerHTML =
-      '<p class="crumbs"><a href="index.html">' + T('الرئيسية', 'Home') + '</a> / ' +
-        esc(f(b, 'title')) + ' / ' + T('الفصل ', 'Chapter ') + num(c.n) + '</p>' +
-      '<p class="eyebrow" style="margin-top:18px">' + T('الفصل ', 'Chapter ') + num(c.n) + '</p>' +
-      '<h1>' + esc(f(c, 'title')) + '</h1>' +
-      '<p class="ch-book">' + esc(f(b, 'title')) + ' — ' + esc(f(b, 'author')) + '</p>' +
-      arabicNote() +
-
-      '<div class="ch-intro">' +
-        figures(c.images, f(c, 'title')) +
-        (c.intro && c.intro.length ? '<h2>' + T('مقدّمة الفصل', 'The chapter opens') + '</h2>' + readable(c.intro) : '') +
-        '<div class="ch-tools">' +
+      '<div class="read-shell">' +
+        chapterToc(c) +
+        '<article class="ch-body">' +
+          '<p class="crumbs"><a href="index.html">' + T('الرئيسية', 'Home') + '</a> / ' +
+            esc(f(b, 'title')) + ' / ' + T('الفصل ', 'Chapter ') + num(c.n) + '</p>' +
+          '<p class="eyebrow" style="margin-top:18px">' + T('الفصل ', 'Chapter ') + num(c.n) + '</p>' +
+          '<h1>' + esc(f(c, 'title')) + '</h1>' +
+          '<p class="ch-book">' + esc(f(b, 'title')) + ' — ' + esc(f(b, 'author')) + '</p>' +
+          arabicNote() +
           '<p class="hl-hint">' + T('حدّد أيّ نصّ لتعلّق عليه أو تطرح سؤالًا حوله.',
                                     'Select any passage to comment on it or ask a question.') + '</p>' +
-          (c.introPdf ? '<a class="btn btn-outline" href="' + esc(c.introPdf) + '" target="_blank" rel="noopener">' +
-            T('غلاف الفصل ومقدّمته (PDF)', 'Chapter cover and introduction (PDF)') + '</a>' : '') +
-          (b.pdf ? '<a class="btn btn-gold" href="' + esc(b.pdf) + '" download>' +
-            T('تحميل الكتاب كاملًا (PDF)', 'Download the whole book (PDF)') + '</a>' : '') +
-        '</div>' +
-      '</div>' +
 
-      '<div class="ch-sections">' +
-        '<h2>' + T('الأقسام', 'Sections') + '</h2>' +
-        '<div class="sec-list">' + nest(c.sections).map(function (grp, gi) {
-          return '<details class="sec" id="' + anchor(grp.top.label) + '"' +
-            (gi === 0 ? ' open' : '') + '>' +
-            '<summary>' +
-              (grp.top.label ? '<span class="sec-n">' + esc(grp.top.label) + '</span>' : '') +
-              '<span class="sec-t">' + esc(grp.top.title) + '</span>' +
-              (isAr() || !grp.top.title_en ? '' : '<span class="sec-term">' + esc(grp.top.title_en) + '</span>') +
-              (grp.subs.length ? '<span class="sec-c">' + num(grp.subs.length) + '</span>' : '') +
-              '<span class="sec-open" aria-hidden="true"></span>' +
-            '</summary>' +
-            sectionBody(grp.top) +
-            (grp.subs.length ? '<div class="sub-list">' + grp.subs.map(function (s) {
-              return sectionCard(s, false);
-            }).join('') + '</div>' : '') +
-            '</details>';
-        }).join('') + '</div>' +
-      '</div>' +
+          figures(c.images, f(c, 'title')) +
 
-      '<nav class="ch-nav">' +
-        (prev ? '<a class="btn btn-outline" href="chapter.html?book=' + esc(b.id) + '&ch=' + prev.n + '">' +
-          T('السابق: ', 'Previous: ') + esc(f(prev, 'title')) + '</a>' : '<span></span>') +
-        (next ? '<a class="btn btn-outline" href="chapter.html?book=' + esc(b.id) + '&ch=' + next.n + '">' +
-          T('التالي: ', 'Next: ') + esc(f(next, 'title')) + '</a>' : '<span></span>') +
-      '</nav>';
+          (c.intro && c.intro.length
+            ? '<section class="sec-block" id="ch-open">' +
+                '<h2 class="sec-h"><span class="sec-t">' +
+                T('مقدّمة الفصل', 'The chapter opens') + '</span></h2>' +
+                readable(c.intro) +
+              '</section>'
+            : '') +
+
+          c.sections.map(sectionBlock).join('') +
+
+          '<nav class="ch-nav">' +
+            (prev ? '<a class="btn btn-outline" href="chapter.html?book=' + esc(b.id) + '&ch=' + prev.n + '">' +
+              T('السابق: ', 'Previous: ') + esc(f(prev, 'title')) + '</a>' : '<span></span>') +
+            (next ? '<a class="btn btn-outline" href="chapter.html?book=' + esc(b.id) + '&ch=' + next.n + '">' +
+              T('التالي: ', 'Next: ') + esc(f(next, 'title')) + '</a>' : '<span></span>') +
+          '</nav>' +
+        '</article>' +
+      '</div>';
 
     bindHighlight();
     renderComments();
+    spyChapter();
     openLinked();
     if (window.MANARA_REVEAL) window.MANARA_REVEAL();
   }
 
-  /* A contents entry points at one section; open it, and its parent if it is
-     nested, then bring it into view. */
+  /* Mark the section being read in the chapter contents. Bound here rather
+     than in script.js, because the list only exists once this has run. */
+  function spyChapter() {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.ch-toc a'));
+    if (!links.length) return;
+    links.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var el = document.getElementById(a.getAttribute('href').slice(1));
+        if (!el) return;
+        e.preventDefault();
+        history.replaceState(null, '', a.getAttribute('href'));
+        goTo(el);
+      });
+    });
+    var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var mark = function () {
+      var pos = window.scrollY + 160, at = 0;
+      targets.forEach(function (el, i) { if (el && el.offsetTop <= pos) at = i; });
+      links.forEach(function (a, i) { a.classList.toggle('active', i === at); });
+    };
+    mark();
+    window.addEventListener('scroll', mark, { passive: true });
+  }
+
+  /* Jumping to a section waits for the webfont: the Arabic face reflows tens
+     of thousands of pixels of text, and a jump made before it lands stops
+     short of the heading. */
+  function goTo(el) {
+    // The chapter settles asynchronously — the Arabic webfont reflows the text
+    // and figures load in — so the first jump can land short. Check back and
+    // correct until the heading is where it should be.
+    var jump = function (tries) {
+      el.scrollIntoView({ block: 'start' });
+      if (tries > 0) setTimeout(function () {
+        if (Math.abs(el.getBoundingClientRect().top - 96) > 8) jump(tries - 1);
+      }, 220);
+    };
+    var go = function () { jump(4); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+    else setTimeout(go, 60);
+  }
+
+  /* A contents entry names one section; bring it into view. */
   function openLinked() {
     var id = (location.hash || '').slice(1);
     if (!id) return;
     var el = document.getElementById(id);
-    if (!el) return;
-    var p = el.parentNode.closest ? el.parentNode.closest('details') : null;
-    if (p) p.open = true;
-    el.open = true;
-    setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+    if (el) goTo(el);
   }
 
   /* ---------------- highlight to comment ---------------- */

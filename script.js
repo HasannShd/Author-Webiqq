@@ -60,7 +60,7 @@
 
   /* Reading progress */
   var bar = document.querySelector('.progress');
-  var article = document.querySelector('.prose');
+  var article = document.querySelector('.ch-body, .prose');
   if (bar && article) {
     var update = function () {
       var top = article.getBoundingClientRect().top + window.scrollY;

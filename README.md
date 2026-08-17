@@ -21,16 +21,16 @@ site, dashboard included, and the choice persists in `localStorage`.
 
 ## Reading and commenting
 
-Chapter text is web text rather than an embedded PDF, because text selection is what makes
-highlight-to-comment possible at all. A reader selects any passage, attaches a question to that
-exact line, and the quote is stored with the comment and shown above it — in the thread and in
-the dashboard. The author's own PDFs stay alongside as downloads, per section and per chapter,
-under `pdf/`, section by section, with the whole 282-page book as `pdf/full-book.pdf`.
+The whole book is web text. Nothing is served as a PDF and nothing is offered as a download:
+each chapter is a page, each of the author's sections is a section of that page, and his figures
+sit with the text they belong to. Text on the page is also what makes commenting possible — a
+reader selects any passage, attaches a question to that exact line, and the quote is stored with
+the comment and shown above it, in the thread and in the dashboard.
 
 ## Content
 
-`content.js` is the whole astronomy book — 8 chapters, 120 sections, 300 paragraphs and 112
-figures — generated from the 130 PDFs the author supplied. It is generated output: edit the
+`content.js` is the whole astronomy book — 8 chapters, 120 sections, 300 paragraphs and 123
+figures — extracted from the 130 PDFs the author supplied. It is generated output: edit the
 book by re-running the builder, or through the dashboard, not by hand.
 
 Extracting the Arabic needed care. `get_text()` gets two things wrong on these files: a line's

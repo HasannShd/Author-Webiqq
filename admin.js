@@ -112,7 +112,7 @@
     $('ed-title').value = c ? c.title : '';
     $('ed-intro').value = c ? c.intro.join('\n\n') : '';
     $('ed-sections').value = c ? c.sections.map(function (s) {
-      return [(s.depth ? '  ' : '') + (s.label || ''), s.title, s.pdf || ''].join(' | ');
+      return [(s.depth ? '  ' : '') + (s.label || ''), s.title].join(' | ');
     }).join('\n') : '';
     $('ed-note').textContent = '';
     $('editor').hidden = false;
@@ -136,19 +136,18 @@
       .map(function (line, i) {
         var parts = line.split('|');
         var was = existing[i] || {};
-        // The book's text, figures and footnotes stay put; only the number, the
-        // title, the indent and the PDF path come from the line.
+        // The book's text, figures and footnotes stay put; only the number,
+        // the title and the indent come from the line.
         return { label: (parts[0] || '').trim(),
                  depth: /^\s/.test(line) ? 1 : 0,
                  title: (parts[1] || '').trim(), title_en: was.title_en || '',
-                 body: was.body || [], notes: was.notes || [], images: was.images || [],
-                 pdf: (parts[2] || '').trim() || was.pdf || '' };
+                 body: was.body || [], notes: was.notes || [], images: was.images || [] };
       });
     var n = parseInt($('ed-n').value, 10);
     var was = b.chapters.filter(function (x) { return x.n === n; })[0] || {};
     var rec = { n: n || b.chapters.length + 1, title: $('ed-title').value.trim(),
                 title_en: was.title_en || '', intro: intro,
-                cover: was.cover || '', introPdf: was.introPdf || '', sections: sections };
+                images: was.images || [], sections: sections };
     var i = b.chapters.findIndex(function (x) { return x.n === rec.n; });
     if (i >= 0) b.chapters[i] = rec; else b.chapters.push(rec);
     S.setBooks(books);
