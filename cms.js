@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '19';
+  var SEED_VERSION = '20';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -228,20 +228,29 @@
   /* ---------------- chapter reader ---------------- */
   var current = null;
 
+  var K_FOLD = 'manara_folded';
+  function foldedByDefault() { try { return localStorage.getItem(K_FOLD) === '1'; } catch (e) { return false; } }
+
   /* A section of the chapter: its heading, its text, its figures and its
-     footnotes, all on the page. Sub-sections sit a level down. */
-  function sectionBlock(s) {
+     footnotes. The heading folds the section away, because a chapter of
+     thirty-odd sections is a very long page to scroll past. */
+  function sectionBlock(s, folded) {
     var h = s.depth ? 'h3' : 'h2';
-    return '<section class="sec-block' + (s.depth ? ' sub' : '') + '" id="' + anchor(s.label) + '">' +
+    return '<section class="sec-block' + (s.depth ? ' sub' : '') + (folded ? ' folded' : '') +
+        '" id="' + anchor(s.label) + '">' +
       '<' + h + ' class="sec-h">' +
-        (s.label ? '<span class="sec-n">' + esc(s.label) + '</span>' : '') +
-        '<span class="sec-t">' + esc(s.title) + '</span>' +
-        (isAr() || !s.title_en ? '' : '<span class="sec-term">' + esc(s.title_en) + '</span>') +
+        '<button class="sec-fold" type="button" aria-expanded="' + (folded ? 'false' : 'true') + '">' +
+          (s.label ? '<span class="sec-n">' + esc(s.label) + '</span>' : '') +
+          '<span class="sec-t">' + esc(s.title) + '</span>' +
+          (isAr() || !s.title_en ? '' : '<span class="sec-term">' + esc(s.title_en) + '</span>') +
+          '<span class="sec-open" aria-hidden="true"></span>' +
+        '</button>' +
       '</' + h + '>' +
-      readable(s.body) +
-      figures(s.images, f(s, 'title')) +
-      footnotes(s.notes) +
-      '</section>';
+      '<div class="sec-inner">' +
+        readable(s.body) +
+        figures(s.images, f(s, 'title')) +
+        footnotes(s.notes) +
+      '</div></section>';
   }
 
   function chapterToc(c) {
@@ -273,6 +282,7 @@
 
     var prev = b.chapters.filter(function (x) { return x.n === c.n - 1; })[0];
     var next = b.chapters.filter(function (x) { return x.n === c.n + 1; })[0];
+    var fold = foldedByDefault();
 
     host.innerHTML =
       '<div class="read-shell">' +
@@ -284,20 +294,21 @@
           '<h1>' + esc(f(c, 'title')) + '</h1>' +
           '<p class="ch-book">' + esc(f(b, 'title')) + ' — ' + esc(f(b, 'author')) + '</p>' +
           arabicNote() +
-          '<p class="hl-hint">' + T('حدّد أيّ نصّ لتعلّق عليه أو تطرح سؤالًا حوله.',
-                                    'Select any passage to comment on it or ask a question.') + '</p>' +
+          '<div class="ch-tools">' +
+            '<p class="hl-hint">' + T('حدّد أيّ نصّ لتعلّق عليه أو تطرح سؤالًا حوله.',
+                                      'Select any passage to comment on it or ask a question.') + '</p>' +
+            '<button class="btn btn-outline" id="fold-all" type="button"></button>' +
+          '</div>' +
 
           figures(c.images, f(c, 'title')) +
 
           (c.intro && c.intro.length
-            ? '<section class="sec-block" id="ch-open">' +
-                '<h2 class="sec-h"><span class="sec-t">' +
-                T('مقدّمة الفصل', 'The chapter opens') + '</span></h2>' +
-                readable(c.intro) +
-              '</section>'
+            ? sectionBlock({ label: '', depth: 0, title: T('مقدّمة الفصل', 'The chapter opens'),
+                             body: c.intro, images: [], notes: [] }, fold)
+                .replace('id="s-"', 'id="ch-open"')
             : '') +
 
-          c.sections.map(sectionBlock).join('') +
+          c.sections.map(function (x) { return sectionBlock(x, fold); }).join('') +
 
           '<nav class="ch-nav">' +
             (prev ? '<a class="btn btn-outline" href="chapter.html?book=' + esc(b.id) + '&ch=' + prev.n + '">' +
@@ -309,6 +320,7 @@
       '</div>';
 
     bindHighlight();
+    bindFolding();
     renderComments();
     spyChapter();
     openLinked();
@@ -339,10 +351,51 @@
     window.addEventListener('scroll', mark, { passive: true });
   }
 
+  /* Folding. One heading folds its own section; the button at the top folds
+     the lot, and that choice is remembered for the next chapter and visit. */
+  function bindFolding() {
+    var all = function () { return Array.prototype.slice.call(document.querySelectorAll('.sec-block')); };
+
+    document.querySelectorAll('.sec-fold').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var block = btn.closest('.sec-block');
+        setFold(block, !block.classList.contains('folded'));
+        label();
+      });
+    });
+
+    var btn = document.getElementById('fold-all');
+    if (!btn) return;
+    // Anything folded means the button offers to open the lot — which is what
+    // a reader expects after a link to one section has opened just that one.
+    var anyFolded = function () {
+      return all().some(function (x) { return x.classList.contains('folded'); });
+    };
+    var label = function () {
+      var expand = anyFolded();
+      btn.textContent = expand ? T('فتح الأقسام', 'Expand all') : T('طيّ الأقسام', 'Collapse all');
+      btn.setAttribute('aria-expanded', String(!expand));
+    };
+    btn.addEventListener('click', function () {
+      var fold = !anyFolded();
+      all().forEach(function (x) { setFold(x, fold); });
+      try { localStorage.setItem(K_FOLD, fold ? '1' : '0'); } catch (e) {}
+      label();
+    });
+    label();
+  }
+
+  function setFold(block, folded) {
+    block.classList.toggle('folded', folded);
+    var b = block.querySelector('.sec-fold');
+    if (b) b.setAttribute('aria-expanded', String(!folded));
+  }
+
   /* Jumping to a section waits for the webfont: the Arabic face reflows tens
      of thousands of pixels of text, and a jump made before it lands stops
      short of the heading. */
   function goTo(el) {
+    setFold(el, false);
     // The chapter settles asynchronously — the Arabic webfont reflows the text
     // and figures load in — so the first jump can land short. Check back and
     // correct until the heading is where it should be.
