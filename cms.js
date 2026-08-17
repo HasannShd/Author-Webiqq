@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '20';
+  var SEED_VERSION = '21';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -30,8 +30,8 @@
       subjectLabel: 'الفلك', subjectLabel_en: 'Astronomy',
       title: 'اَلْفَلَكُ', title_en: 'Al-Falak — Astronomy',
       /* The cover's own wording. */
-      subtitle: 'رحلة في عالم الفضاء — من الأساطير إلى أسرار الكون',
-      subtitle_en: 'A journey through space — from the myths to the secrets of the universe',
+      subtitle: 'رحلة في أعماق الفضاء',
+      subtitle_en: 'A journey into the depths of space',
       author: 'د. محمد قيصرون ميرزا', author_en: 'Dr. Mohammed Qaisaroun Mirza',
       year: '2026',
       cover: 'img/cover.jpg',
@@ -143,6 +143,32 @@
       list.map(function (n) { return '<p>' + esc(n) + '</p>'; }).join('') + '</div>';
   }
 
+  /* The book's own opening pages — the author's dedication, his two
+     introductions and his foreword. Folded to begin with: a reader who came
+     for the contents should not have to scroll past a thousand words first. */
+  function frontMatter(fr) {
+    if (!fr || !fr.sections || !fr.sections.length) return '';
+    return '<div class="front">' +
+      (fr.lead && fr.lead.length
+        ? '<div class="front-lead readable" lang="ar" dir="rtl">' +
+            fr.lead.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') +
+          '</div>' : '') +
+      (fr.plate ? '<div class="figs front-plate"><img src="' + esc(fr.plate.src) +
+        '" alt="" width="' + fr.plate.w + '" height="' + fr.plate.h +
+        '" loading="lazy" decoding="async"></div>' : '') +
+      fr.sections.map(function (x) {
+        return '<section class="sec-block folded front-sec">' +
+          '<h3 class="sec-h"><button class="sec-fold" type="button" aria-expanded="false">' +
+            '<span class="sec-t">' + esc(f(x, 'title')) + '</span>' +
+            '<span class="sec-open" aria-hidden="true"></span>' +
+          '</button></h3>' +
+          '<div class="sec-inner">' + readable(x.body) +
+            (x.verse ? '<p class="front-verse ar">' + esc(x.verse) + '</p>' : '') +
+          '</div></section>';
+      }).join('') +
+    '</div>';
+  }
+
   /* ---------------- home: the books ---------------- */
   function renderHome() {
     var wrap = document.getElementById('books');
@@ -201,6 +227,7 @@
                 '</div>' : '') +
           '</div>' +
         '</div>' +
+        (b.front ? frontMatter(b.front) : '') +
         (tops ? '<div class="vol-chapters">' +
           '<h4>' + T('المحتويات', 'Contents') + '</h4>' +
           '<ol class="ch-list">' + b.chapters.map(function (c) {
@@ -222,6 +249,7 @@
           }).join('') + '</ol></div>' : '') +
       '</article>';
     }).join('');
+    bindFolding();
     if (window.MANARA_REVEAL) window.MANARA_REVEAL();
   }
 
@@ -355,6 +383,8 @@
      the lot, and that choice is remembered for the next chapter and visit. */
   function bindFolding() {
     var all = function () { return Array.prototype.slice.call(document.querySelectorAll('.sec-block')); };
+    // Relabelled only where the fold-all button exists; the home page has none.
+    var label = function () {};
 
     document.querySelectorAll('.sec-fold').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -365,13 +395,13 @@
     });
 
     var btn = document.getElementById('fold-all');
-    if (!btn) return;
+    if (!btn) return;   // the home page folds its opening pages only
     // Anything folded means the button offers to open the lot — which is what
     // a reader expects after a link to one section has opened just that one.
     var anyFolded = function () {
       return all().some(function (x) { return x.classList.contains('folded'); });
     };
-    var label = function () {
+    label = function () {
       var expand = anyFolded();
       btn.textContent = expand ? T('فتح الأقسام', 'Expand all') : T('طيّ الأقسام', 'Collapse all');
       btn.setAttribute('aria-expanded', String(!expand));
