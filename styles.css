@@ -761,8 +761,29 @@ footer ul a:hover { color: var(--paper); }
 .ch-list a:hover { background: var(--paper-2); transform: translateX(-3px); }
 [dir="ltr"] .ch-list a:hover { transform: translateX(3px); }
 
-/* The book's own table of contents: every chapter with its sections under it. */
-.ch-list > li { margin-bottom: 6px; }
+/* The book's own table of contents: a chapter opens to show its sections. */
+.toc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.toc-all {
+  background: none; border: 1px solid var(--line); border-radius: 999px;
+  font-family: var(--arabic); font-size: 12.5px; color: var(--muted);
+  padding: 6px 14px; cursor: pointer; transition: color .2s, border-color .2s;
+}
+.toc-all:hover { color: var(--ink); border-color: var(--gold-soft); }
+
+.ch-list > li { margin-bottom: 2px; }
+.toc-row { display: flex; align-items: center; gap: 4px; }
+.toc-row .toc-ch { flex: 1; min-width: 0; }
+.toc-toggle {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; background: none; border: 0; cursor: pointer;
+  border-radius: 10px; color: var(--gold);
+}
+.toc-toggle:hover { background: var(--paper-2); }
+.toc-toggle .sec-open { margin: 0; }
+.toc-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.toc-item.folded .toc-sec { display: none; }
+.toc-item:not(.folded) .toc-toggle .sec-open::after { transform: rotate(0deg); }
+.toc-item.folded .toc-toggle .sec-open::after { transform: rotate(90deg); }
 .toc-sec {
   list-style: none; margin: 0 0 14px; padding: 0 46px 0 12px;
   columns: 2; column-gap: 26px;
@@ -851,7 +872,10 @@ footer ul a:hover { color: var(--paper); }
 }
 .sec-fold:hover .sec-t { color: var(--gold); }
 .sec-fold:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
-.sec-open { width: 20px; height: 20px; position: relative; flex: none; color: var(--gold); margin-inline-start: auto; }
+.sec-open {
+  display: block; width: 20px; height: 20px; position: relative; flex: none;
+  color: var(--gold); margin-inline-start: auto;
+}
 .sec-open::before, .sec-open::after {
   content: ""; position: absolute; inset: 50% 2px auto 2px; height: 1.5px;
   background: currentColor; transition: transform .25s;

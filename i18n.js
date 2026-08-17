@@ -49,6 +49,10 @@
     "Foreword": "تصدير",
     "Introduction to the first edition": "مقدّمة الطبعة الأولى",
 
+    "Open all": "فتح الكلّ",
+    "Close all": "طيّ الكلّ",
+    "Sections of this chapter": "أقسام الفصل",
+
     /* ---- home ---- */
     "The astronomy book in full — eight chapters, from what the universe is made of to a dialogue between mind and heart — written for the curious reader rather than the specialist. Every page is here to read, and open to your questions on any passage.":
       "كتابُ الفلك كاملًا — ثمانيةُ فصولٍ، من مكوّنات الكونِ إلى حوارٍ بين العقلِ والقلبِ — كُتب للقارئ الفضوليّ لا للمتخصّص. صفحاتُه كلُّها هنا للقراءة، ومفتوحٌ لأسئلتك على أيّ فقرة.",

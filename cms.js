@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '21';
+  var SEED_VERSION = '22';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -229,15 +229,23 @@
         '</div>' +
         (b.front ? frontMatter(b.front) : '') +
         (tops ? '<div class="vol-chapters">' +
-          '<h4>' + T('المحتويات', 'Contents') + '</h4>' +
+          '<div class="toc-head">' +
+            '<h4>' + T('المحتويات', 'Contents') + '</h4>' +
+            '<button class="toc-all" type="button" aria-expanded="false"></button>' +
+          '</div>' +
           '<ol class="ch-list">' + b.chapters.map(function (c) {
             var to = 'chapter.html?book=' + esc(b.id) + '&ch=' + c.n;
-            return '<li>' +
-              '<a class="toc-ch" href="' + to + '">' +
-                '<span class="ch-n">' + num(c.n) + '</span>' +
-                '<span class="ch-t">' + esc(f(c, 'title')) + '</span>' +
-                '<span class="ch-s">' + num(c.sections.length) + ' ' + T('قسمًا', 'sections') + '</span>' +
-              '</a>' +
+            return '<li class="toc-item folded">' +
+              '<div class="toc-row">' +
+                '<a class="toc-ch" href="' + to + '">' +
+                  '<span class="ch-n">' + num(c.n) + '</span>' +
+                  '<span class="ch-t">' + esc(f(c, 'title')) + '</span>' +
+                  '<span class="ch-s">' + num(c.sections.length) + ' ' + T('قسمًا', 'sections') + '</span>' +
+                '</a>' +
+                '<button class="toc-toggle" type="button" aria-expanded="false" aria-label="' +
+                  T('أقسام الفصل', 'Sections of this chapter') + '">' +
+                  '<span class="sec-open" aria-hidden="true"></span></button>' +
+              '</div>' +
               '<ul class="toc-sec">' + c.sections.map(function (x) {
                 return '<li' + (x.depth ? ' class="sub"' : '') + '>' +
                   '<a href="' + to + '#' + anchor(x.label) + '">' +
@@ -250,7 +258,43 @@
       '</article>';
     }).join('');
     bindFolding();
+    bindContents();
     if (window.MANARA_REVEAL) window.MANARA_REVEAL();
+  }
+
+  /* The contents opens one chapter at a time. All 120 sections at once is a
+     very long list to scroll past on a phone, so chapters start closed. */
+  function bindContents() {
+    var items = Array.prototype.slice.call(document.querySelectorAll('.toc-item'));
+    if (!items.length) return;
+    var btn = document.querySelector('.toc-all');
+
+    var set = function (li, open) {
+      li.classList.toggle('folded', !open);
+      li.querySelector('.toc-toggle').setAttribute('aria-expanded', String(open));
+    };
+    var anyClosed = function () {
+      return items.some(function (li) { return li.classList.contains('folded'); });
+    };
+    var label = function () {
+      if (!btn) return;
+      var open = anyClosed();
+      btn.textContent = open ? T('فتح الكلّ', 'Open all') : T('طيّ الكلّ', 'Close all');
+      btn.setAttribute('aria-expanded', String(!open));
+    };
+
+    items.forEach(function (li) {
+      li.querySelector('.toc-toggle').addEventListener('click', function () {
+        set(li, li.classList.contains('folded'));
+        label();
+      });
+    });
+    if (btn) btn.addEventListener('click', function () {
+      var open = anyClosed();
+      items.forEach(function (li) { set(li, open); });
+      label();
+    });
+    label();
   }
 
   /* ---------------- chapter reader ---------------- */
