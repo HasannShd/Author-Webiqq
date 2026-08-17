@@ -733,17 +733,22 @@ footer ul a:hover { color: var(--paper); }
   background: #f8f9f7; border: 1px solid var(--line-soft); border-radius: var(--r);
   padding: clamp(20px, 2.4vw, 30px); box-shadow: var(--shadow);
 }
-.vol-head { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 22px; align-items: start; }
+/* The cover leads: full width of the card, centred, with everything about the
+   book set beneath it. */
+.vol-head { display: grid; justify-items: center; text-align: center; gap: 8px; }
+.vol-head > div { max-width: 62ch; }
 .vol-cover {
   /* height:auto so the element's height attribute cannot beat the aspect ratio */
-  width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 4px 10px 10px 4px;
-  background: var(--paper-3); box-shadow: var(--shadow-lg);
+  width: min(100%, 340px); height: auto; aspect-ratio: 3 / 4; object-fit: contain;
+  border-radius: 6px; background: var(--paper-3); box-shadow: var(--shadow-lg);
+  margin-bottom: 22px;
 }
 .vol-head h3 { font-size: clamp(24px, 2.8vw, 32px); margin: 10px 0 4px; }
 .vol-sub { font-family: var(--arabic); font-size: 14.5px; color: var(--muted); }
 .vol-blurb { font-size: 14.5px; color: var(--muted); margin-top: 12px; line-height: 1.65; }
 .vol-free { font-size: 12.5px; color: var(--gold); font-weight: 600; margin-top: 14px; }
 .vol-head .btn { margin-top: 12px; }
+.vol-actions { justify-content: center; }
 
 .vol-chapters { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 20px; }
 .vol-chapters h4 {
@@ -757,6 +762,24 @@ footer ul a:hover { color: var(--paper); }
 }
 .ch-list a:hover { background: var(--paper-2); transform: translateX(-3px); }
 [dir="ltr"] .ch-list a:hover { transform: translateX(3px); }
+
+/* The book's own table of contents: every chapter with its sections under it. */
+.ch-list > li { margin-bottom: 6px; }
+.toc-sec {
+  list-style: none; margin: 0 0 14px; padding: 0 46px 0 12px;
+  columns: 2; column-gap: 26px;
+}
+[dir="ltr"] .toc-sec { padding: 0 12px 0 46px; }
+.toc-sec li { break-inside: avoid; }
+.toc-sec li.sub { padding-inline-start: 16px; }
+.toc-sec a {
+  display: flex; gap: 8px; align-items: baseline; text-decoration: none;
+  font-family: var(--arabic); font-size: 13.5px; line-height: 1.5;
+  color: var(--muted); padding: 4px 6px; border-radius: 6px;
+}
+.toc-sec a:hover { color: var(--ink); background: var(--paper-2); }
+.toc-sec b { font-family: var(--serif); font-size: 11.5px; color: var(--gold); flex: none; min-width: 2.4em; }
+.toc-sec li.sub a { font-size: 12.5px; }
 .ch-n {
   font-family: var(--serif); font-size: 15px; color: var(--gold); text-align: center;
   border: 1px solid var(--line); border-radius: 7px; padding: 2px 0;
@@ -857,7 +880,7 @@ footer ul a:hover { color: var(--paper); }
   font-size: 13.5px; color: var(--muted); margin-top: 16px;
   border-inline-start: 2px solid var(--gold-soft); padding-inline-start: 12px;
 }
-.vol-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.vol-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; justify-content: center; }
 
 .ch-nav {
   display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
@@ -889,9 +912,9 @@ footer ul a:hover { color: var(--paper); }
   .how { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .vol-head { grid-template-columns: 1fr; }
-  .vol-cover { max-width: 170px; }
+  .vol-cover { width: min(100%, 210px); }
   .ch-list a { grid-template-columns: 30px minmax(0, 1fr); }
+  .toc-sec { columns: 1; padding-inline: 34px 8px; }
   .ch-s { display: none; }
   .sec summary { grid-template-columns: 42px minmax(0, 1fr) auto; }
   .sec-term { display: none; }

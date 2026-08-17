@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '16';
+  var SEED_VERSION = '17';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -120,6 +120,8 @@
       'the text below is the author’s own.</p>';
   }
 
+  function anchor(label) { return 's-' + String(label || '').replace(/\./g, '-'); }
+
   function readable(paras) {
     if (!paras || !paras.length) return '';
     return '<div class="readable" lang="ar" dir="rtl">' +
@@ -201,13 +203,23 @@
           '</div>' +
         '</div>' +
         (tops ? '<div class="vol-chapters">' +
-          '<h4>' + T('الفصول', 'Chapters') + '</h4>' +
+          '<h4>' + T('المحتويات', 'Contents') + '</h4>' +
           '<ol class="ch-list">' + b.chapters.map(function (c) {
-            return '<li><a href="chapter.html?book=' + esc(b.id) + '&ch=' + c.n + '">' +
-              '<span class="ch-n">' + num(c.n) + '</span>' +
-              '<span class="ch-t">' + esc(f(c, 'title')) + '</span>' +
-              '<span class="ch-s">' + num(c.sections.length) + ' ' + T('قسمًا', 'sections') + '</span>' +
-              '</a></li>';
+            var to = 'chapter.html?book=' + esc(b.id) + '&ch=' + c.n;
+            return '<li>' +
+              '<a class="toc-ch" href="' + to + '">' +
+                '<span class="ch-n">' + num(c.n) + '</span>' +
+                '<span class="ch-t">' + esc(f(c, 'title')) + '</span>' +
+                '<span class="ch-s">' + num(c.sections.length) + ' ' + T('قسمًا', 'sections') + '</span>' +
+              '</a>' +
+              '<ul class="toc-sec">' + c.sections.map(function (x) {
+                return '<li' + (x.depth ? ' class="sub"' : '') + '>' +
+                  '<a href="' + to + '#' + anchor(x.label) + '">' +
+                    (x.label ? '<b>' + esc(x.label) + '</b>' : '') +
+                    '<span>' + esc(x.title) + '</span>' +
+                  '</a></li>';
+              }).join('') + '</ul>' +
+            '</li>';
           }).join('') + '</ol></div>' : '') +
       '</article>';
     }).join('');
@@ -231,7 +243,7 @@
   }
 
   function sectionCard(s, open) {
-    return '<details class="sec"' + (open ? ' open' : '') + '>' +
+    return '<details class="sec" id="' + anchor(s.label) + '"' + (open ? ' open' : '') + '>' +
       '<summary>' +
         (s.label ? '<span class="sec-n">' + esc(s.label) + '</span>' : '') +
         '<span class="sec-t">' + esc(s.title) + '</span>' +
@@ -291,7 +303,8 @@
       '<div class="ch-sections">' +
         '<h2>' + T('الأقسام', 'Sections') + '</h2>' +
         '<div class="sec-list">' + nest(c.sections).map(function (grp, gi) {
-          return '<details class="sec"' + (gi === 0 ? ' open' : '') + '>' +
+          return '<details class="sec" id="' + anchor(grp.top.label) + '"' +
+            (gi === 0 ? ' open' : '') + '>' +
             '<summary>' +
               (grp.top.label ? '<span class="sec-n">' + esc(grp.top.label) + '</span>' : '') +
               '<span class="sec-t">' + esc(grp.top.title) + '</span>' +
@@ -316,7 +329,21 @@
 
     bindHighlight();
     renderComments();
+    openLinked();
     if (window.MANARA_REVEAL) window.MANARA_REVEAL();
+  }
+
+  /* A contents entry points at one section; open it, and its parent if it is
+     nested, then bring it into view. */
+  function openLinked() {
+    var id = (location.hash || '').slice(1);
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var p = el.parentNode.closest ? el.parentNode.closest('details') : null;
+    if (p) p.open = true;
+    el.open = true;
+    setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
   }
 
   /* ---------------- highlight to comment ---------------- */
