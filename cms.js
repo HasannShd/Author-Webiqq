@@ -10,7 +10,7 @@
   /* Bump this whenever the shipped content changes. A browser that still holds
      an older copy in localStorage would otherwise keep showing it and never
      see the new chapters or PDFs. */
-  var SEED_VERSION = '22';
+  var SEED_VERSION = '23';
   try {
     if (localStorage.getItem(K_VER) !== SEED_VERSION) {
       localStorage.removeItem(K_BOOKS);
@@ -148,14 +148,15 @@
      for the contents should not have to scroll past a thousand words first. */
   function frontMatter(fr) {
     if (!fr || !fr.sections || !fr.sections.length) return '';
+    // The plate leads and everything the author wrote sits under it.
     return '<div class="front">' +
+      (fr.plate ? '<div class="figs front-plate"><img src="' + esc(fr.plate.src) +
+        '" alt="" width="' + fr.plate.w + '" height="' + fr.plate.h +
+        '" loading="lazy" decoding="async"></div>' : '') +
       (fr.lead && fr.lead.length
         ? '<div class="front-lead readable" lang="ar" dir="rtl">' +
             fr.lead.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') +
           '</div>' : '') +
-      (fr.plate ? '<div class="figs front-plate"><img src="' + esc(fr.plate.src) +
-        '" alt="" width="' + fr.plate.w + '" height="' + fr.plate.h +
-        '" loading="lazy" decoding="async"></div>' : '') +
       fr.sections.map(function (x) {
         return '<section class="sec-block folded front-sec">' +
           '<h3 class="sec-h"><button class="sec-fold" type="button" aria-expanded="false">' +
